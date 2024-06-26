@@ -5,26 +5,29 @@ import styled from 'styled-components';
 const Login = () => {
   const navigate = useNavigate();
 
-  axios.post('http://localhost:3000/auth/login',
-    {
-      userName: "user",
-      password: "password"
-    },
-    {
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
-    }
-  )
+  axios.post('http://localhost:3000/auth/login', {
+    userid: "user", // API 문서에 따르면 "userName"이 아닌 "userid"가 필요합니다
+    password: "password"
+  })
     .then((response) => {
-      const token = response.data.token;
-      localStorage.setItem('', token);
+      const token = response.data.accessToken; // 응답의 "accessToken"을 가져옵니다
+      localStorage.setItem('accessToken', token); // "accessToken"을 로컬 스토리지에 저장합니다
       alert('로그인 성공');
     })
     .catch((error) => {
-      console.log('로그인 실패', error);
+      if (error.response) {
+        if (error.response.status === 400 && error.response.data.message === '아이디가 일치하지 않음') {
+          alert('아이디가 일치하지 않음');
+        } else if (error.response.status === 400 && error.response.data.message === '비밀번호가 일치하지 않음') {
+          alert('비밀번호가 일치하지 않음');
+        } else {
+          alert('로그인 실패: ' + error.response.data.message);
+        }
+      } else {
+        console.log('로그인 실패', error);
+      }
     });
+
 
   return (
     <Background>
