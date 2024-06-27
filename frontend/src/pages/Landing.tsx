@@ -26,8 +26,6 @@ function Landing() {
       }
     });
 
-
-
   const navigate = useNavigate();
 
   return (
