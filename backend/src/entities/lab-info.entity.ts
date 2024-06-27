@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 
-@Entity('Lab-info')
+@Entity('Labinfo')
 export class LabInformationEntity {
   @PrimaryGeneratedColumn()
   id: string;
@@ -17,5 +17,4 @@ export class LabInformationEntity {
 
   @Column('boolean', { nullable: false, default: true })
   Available: boolean;
-
 }
