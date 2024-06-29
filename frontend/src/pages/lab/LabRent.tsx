@@ -18,6 +18,7 @@ interface Lab {
 
 interface RentalRequest {
   id: number;
+  userId: number;
   user: string;
   lab: string;
   use: string;
@@ -31,16 +32,9 @@ const LabRent: React.FC = () => {
   const [rentalRequests, setRentalRequests] = useState<RentalRequest[]>([]);
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
 
-  const user: RentalRequest = {
-    id: 1,
-    user: '성홍제',
-    lab: '랩 7실',
-    use: '캡스톤 회의때문에 빌리고 싶습니다.',
-    time: '7:00'
-  };
-
   useEffect(() => {
     fetchAvailableLabs();
+    fetchRentalRequests();
   }, []);
 
   const fetchAvailableLabs = async () => {
@@ -52,17 +46,29 @@ const LabRent: React.FC = () => {
     }
   };
 
+  const fetchRentalRequests = async () => {
+    try {
+      const response = await axios.get<RentalRequest[]>('http://localhost:3000/lab/requests');
+      setRentalRequests(response.data);
+    } catch (error) {
+      console.error('대여 요청 조회 실패', error);
+    }
+  };
+
   const handleDelete = async () => {
     try {
       const token = localStorage.getItem('token');
       if (selectedRequestId !== null) {
-        await axios.patch(`http://localhost:3000/lab/cancel/${selectedRequestId}`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setRentalRequests(rentalRequests.filter(request => request.id !== selectedRequestId));
-        closeModal();
+        const request = rentalRequests.find(req => req.id === selectedRequestId);
+        if (request) {
+          await axios.patch(`http://localhost:3000/lab/cancel/${request.userId}`, {}, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setRentalRequests(rentalRequests.filter(req => req.id !== selectedRequestId));
+          closeModal();
+        }
       }
     } catch (error) {
       console.error('실습실 취소 실패', error);
@@ -115,13 +121,15 @@ const LabRent: React.FC = () => {
               <p className="list-detail">대여시간</p>
               <p className="trash"></p>
             </div>
-            <div className='user-list'>
-              <p className="user-detail">{user.user}</p>
-              <p className="user-detail">{user.lab}</p>
-              <p className="user-detail">{user.use}</p>
-              <p className="user-detail">{user.time}</p>
-              <img src={trash} alt="delete img" className='trash' onClick={() => openModal(user.id)} />
-            </div>
+            {rentalRequests.map((request) => (
+              <div key={request.id} className='user-list'>
+                <p className="user-detail">{request.user}</p>
+                <p className="user-detail">{request.lab}</p>
+                <p className="user-detail">{request.use}</p>
+                <p className="user-detail">{request.time}</p>
+                <img src={trash} alt="delete img" className='trash' onClick={() => openModal(request.id)} />
+              </div>
+            ))}
           </div>
         </Body>
       </Inner>

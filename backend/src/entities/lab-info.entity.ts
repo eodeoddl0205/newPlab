@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 
-@Entity('Labinfo')
+@Entity('LabInfo')
 export class LabInformationEntity {
   @PrimaryGeneratedColumn()
   id: string;

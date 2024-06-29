@@ -1,9 +1,7 @@
-// import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from '../../components/Header';
 
 const LabEnroll = () => {
-  // const navigate = useNavigate();
   return (
     <Background>
       <Header />
