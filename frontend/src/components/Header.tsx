@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
 
-// props 타입 정의
 interface NavProps {
   isLogin: boolean;
   handleLogout: () => void;

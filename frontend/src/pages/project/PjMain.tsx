@@ -228,8 +228,6 @@ const StyledFiChevronRight = styled(FiChevronRight)`
 const StyledFiChevronLeft = styled(FiChevronLeft)`
 margin-left: 5px;
   font-size: 24px;
-  border-radius: 50%:
-  border: 1px solid #333;
   cursor: pointer;
   &:hover {
     color: #333;

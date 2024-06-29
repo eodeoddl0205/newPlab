@@ -1,29 +1,80 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Modal from 'react-modal';
+import axios from 'axios';
 import Arrow from '../../assets/arrow.svg';
 import GBSW from '../../assets/GBSW.webp';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import trash from '../../assets/trash.svg';
 
-const LabRent = () => {
+interface Lab {
+  id: number;
+  labName: string;
+  location: string;
+  Available: boolean;
+}
+
+interface RentalRequest {
+  id: number;
+  user: string;
+  lab: string;
+  use: string;
+  time: string;
+}
+
+const LabRent: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [availableLabs, setAvailableLabs] = useState<Lab[]>([]);
+  const [rentalRequests, setRentalRequests] = useState<RentalRequest[]>([]);
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
 
-  const user = {
+  const user: RentalRequest = {
+    id: 1,
     user: '성홍제',
     lab: '랩 7실',
     use: '캡스톤 회의때문에 빌리고 싶습니다.',
     time: '7:00'
   };
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-  const handleDelete = () => {
-    closeModal();
+  useEffect(() => {
+    fetchAvailableLabs();
+  }, []);
+
+  const fetchAvailableLabs = async () => {
+    try {
+      const response = await axios.get<Lab[]>('http://localhost:3000/lab/available');
+      setAvailableLabs(response.data);
+    } catch (error) {
+      console.error('실습실 조회 실패', error);
+    }
   };
+
+  const handleDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (selectedRequestId !== null) {
+        await axios.patch(`http://localhost:3000/lab/cancel/${selectedRequestId}`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setRentalRequests(rentalRequests.filter(request => request.id !== selectedRequestId));
+        closeModal();
+      }
+    } catch (error) {
+      console.error('실습실 취소 실패', error);
+    }
+  };
+
+  const openModal = (requestId: number) => {
+    setSelectedRequestId(requestId);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <Background>
@@ -69,7 +120,7 @@ const LabRent = () => {
               <p className="user-detail">{user.lab}</p>
               <p className="user-detail">{user.use}</p>
               <p className="user-detail">{user.time}</p>
-              <img src={trash} alt="delete img" className='trash' onClick={openModal} />
+              <img src={trash} alt="delete img" className='trash' onClick={() => openModal(user.id)} />
             </div>
           </div>
         </Body>
@@ -90,6 +141,7 @@ const LabRent = () => {
     </Background>
   );
 };
+
 const modalStyles = {
   content: {
     top: '50%',
@@ -98,13 +150,13 @@ const modalStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
-    width: '400px', // 모달의 너비 조정
-    height: '250px', // 모달의 높이 조정
-    backgroundColor: '#fff', // 모달의 배경색 변경
-    border: '2px solid #ccc', // 모달의 테두리 스타일 정의
-    borderRadius: '20px', // 모달의 테두리 둥글게 처리
-    padding: '20px', // 내부 패딩 추가
-    overflow: 'auto', // 내용이 넘치면 스크롤바 표시
+    width: '400px',
+    height: '250px',
+    backgroundColor: '#fff',
+    border: '2px solid #ccc',
+    borderRadius: '20px',
+    padding: '20px',
+    overflow: 'auto',
   },
 };
 

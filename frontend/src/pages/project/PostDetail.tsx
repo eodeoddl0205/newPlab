@@ -69,7 +69,7 @@ const PostDetail: React.FC = () => {
 const StyledFaArrowLeft = styled(FaArrowLeft)`
   color: #888;
   font-size: 24px;
-  border-radius: 50%:
+  border-radius: 50%;
   border: 1px solid #333;
   margin-bottom: 10px;
   cursor: pointer;
