@@ -1,51 +1,81 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
 
-const HomeNav = () => {
+// props 타입 정의
+interface NavProps {
+  isLogin: boolean;
+  handleLogout: () => void;
+}
+
+const HomeNav: React.FC<NavProps> = ({ isLogin, handleLogout }) => {
   const navigate = useNavigate();
   return (
     <nav>
       <Link to='/lab'>실습실 대여</Link>
       <Link to='/project'>프로젝트 모집</Link>
-      <button onClick={() => navigate('/login')}>로그인</button>
+      {isLogin ? (
+        <button onClick={handleLogout}>로그아웃</button>
+      ) : (
+        <button onClick={() => navigate('/login')}>로그인</button>
+      )}
     </nav>
   );
 };
 
-const ProjectNav = () => {
+const ProjectNav: React.FC<NavProps> = ({ isLogin, handleLogout }) => {
   const navigate = useNavigate();
   return (
     <nav>
       <Link to='/lab'>실습실 대여</Link>
       <Link to='/project/board'>모집글 쓰기</Link>
-      <button onClick={() => navigate('/login')}>로그인</button>
+      {isLogin ? (
+        <button onClick={handleLogout}>로그아웃</button>
+      ) : (
+        <button onClick={() => navigate('/login')}>로그인</button>
+      )}
     </nav>
   );
 };
 
-const Navigation = () => {
+const Navigation: React.FC<NavProps> = ({ isLogin, handleLogout }) => {
   return (
     <Routes>
-      <Route path='/project' element={<ProjectNav />} />
-      <Route path='/' element={<HomeNav />} />
+      <Route path='/project' element={<ProjectNav isLogin={isLogin} handleLogout={handleLogout} />} />
+      <Route path='/' element={<HomeNav isLogin={isLogin} handleLogout={handleLogout} />} />
     </Routes>
   );
 };
 
-const Header = () => {
+const Header: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      setIsLogin(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('로그아웃하시겠습니까 ?');
+    if (confirmLogout) {
+      localStorage.removeItem('accessToken');
+      setIsLogin(false);
+    }
+  };
+
   return (
-    <>
-      <HeaderStyle>
-        <div className='inner'>
-          <div className='head-container'>
-            <div className='head-brand'>
-              <Link to='/'>플랩</Link>
-            </div>
-            <Navigation />
+    <HeaderStyle>
+      <div className='inner'>
+        <div className='head-container'>
+          <div className='head-brand'>
+            <Link to='/'>플랩</Link>
           </div>
+          <Navigation isLogin={isLogin} handleLogout={handleLogout} />
         </div>
-      </HeaderStyle>
-    </>
+      </div>
+    </HeaderStyle>
   );
 };
 

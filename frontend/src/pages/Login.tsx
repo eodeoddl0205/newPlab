@@ -1,8 +1,48 @@
+import axios from 'axios';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    userid: '',
+    password: ''
+  });
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleLogin = () => {
+    axios.post('http://localhost:3000/auth/login', {
+      userid: formData.userid,
+      password: formData.password
+    })
+      .then((response) => {
+        const token = response.data.accessToken;
+        localStorage.setItem('accessToken', token);
+        alert('로그인 성공하셨습니다!');
+        navigate('/');
+      })
+      .catch((error) => {
+        if (error.response) {
+          if (error.response.status === 400 && error.response.data.message === '아이디 또는 비밀번호가 일치하지 않습니다.') {
+            console.log("아이디 또는 비밀번호가 일치하지 않음");
+          } else {
+            console.log('로그인 실패: ' + error.response.data.message);
+          }
+        } else {
+          console.log('로그인 실패', error);
+        }
+      });
+  };
+
   const navigate = useNavigate();
+
   return (
     <Background>
       <LoginContainer>
@@ -18,18 +58,28 @@ const Login = () => {
             <MainForm>
               <h1 className='LoginContent'>로그인</h1>
               <p className='InputText'>아이디</p>
-              <input type='text' className='Input' />
+              <input
+                type='text'
+                className='Input'
+                name='userid'
+                value={formData.userid}
+                onChange={handleFormChange}
+              />
               <p className='InputText'>비밀번호</p>
-              <input type='password' className='Input' />
+              <input
+                type='password'
+                className='Input'
+                name='password'
+                value={formData.password}
+                onChange={handleFormChange}
+              />
               <div className='MaintainContainer'>
                 <input type='checkbox' className='LoginMaintain'></input>
                 <p className='MaintainText'>로그인유지</p>
               </div>
               <button
                 className='LoginBtn'
-                onClick={() => {
-                  navigate('/');
-                }}
+                onClick={handleLogin}
               >
                 로그인
               </button>
@@ -40,6 +90,7 @@ const Login = () => {
     </Background>
   );
 };
+
 const Background = styled.div`
   width: 100%;
   height: 100vh;
@@ -133,6 +184,10 @@ const MainForm = styled.div`
     height: 40px;
     border: none;
     border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     background-color: #6a96ec;
     color: #fff;
     &:hover {

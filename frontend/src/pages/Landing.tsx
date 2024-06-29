@@ -2,34 +2,14 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import Mockup from '../assets/landing.png';
 import Header from '../components/Header';
-import axios from 'axios';
 
 function Landing() {
-  axios.post('http://localhost:3000/auth/login', {
-    userid: "userid",
-    password: "password"
-  })
-    .then((response) => {
-      const token = response.data.accessToken;
-      localStorage.setItem('accessToken', token);
-      alert('로그인 성공하셨습니다!');
-    })
-    .catch((error) => {
-      if (error.response) {
-        if (error.response.status === 400 && error.response.data.message === '아이디 또는 비밀번호가 일치하지 않습니다.') {
-          console.log("아이디가 일치하지 않음")
-        } else {
-          console.log('로그인 실패: ' + error.response.data.message);
-        }
-      } else {
-        console.log('로그인 실패', error);
-      }
-    });
 
   const navigate = useNavigate();
 
   return (
     <>
+
       <Header />
       <Page>
         <div className='inner'>
