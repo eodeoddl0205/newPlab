@@ -13,7 +13,7 @@ interface Lab {
   id: number;
   labName: string;
   location: string;
-  Available: boolean;
+  available: boolean;
 }
 
 interface RentalRequest {
@@ -114,6 +114,15 @@ const LabRent: React.FC = () => {
         </Head>
         <Body>
           <div>
+            <div className="available-labs">
+              <ul>
+                {availableLabs.map((lab) => (
+                  <li key={lab.id}>
+                    {lab.labName} - {lab.location} - {lab.available ? 'Available' : 'Not Available'}
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div className="rental-list">
               <p className="list-detail">대표자</p>
               <p className="list-detail">대여 실습실</p>
