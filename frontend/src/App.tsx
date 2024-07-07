@@ -8,6 +8,7 @@ import PjMain from './pages/project/PjMain';
 import PjMore from './pages/project/PjMore';
 import PostDetail from './pages/project/PostDetail';
 import TeacherScreen from './pages/lab/TeacherScreen';
+import PostUpload from './pages/project/PostUpload';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path='/project' element={<PjMain />} />
         <Route path='/project/more' element={<PjMore />} />
         <Route path='/project/:id' element={<PostDetail />} />
+        <Route path='/project/Upload' element={<PostUpload />} />
       </Routes>
     </BrowserRouter>
   );

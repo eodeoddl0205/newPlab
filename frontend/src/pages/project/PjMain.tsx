@@ -51,6 +51,13 @@ const PjMain = () => {
       <Header />
       <Section>
         <div className='inner'>
+          <UploadButton
+            onClick={() => {
+              navigate('/project/upload');
+            }}
+          >
+            모집글 작성하기
+          </UploadButton>
           <div className='title'>
             <img src={hello} className='pj-icon' alt='hello icon' />
             <h2>이번 주 인기 모집글</h2>
@@ -127,6 +134,21 @@ const PjMain = () => {
     </>
   );
 };
+
+const UploadButton = styled.button`
+  margin: 20px 0;
+  padding: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 150px;
+  height: 50px;
+  border-radius: 500px;
+  margin-right: 20px;
+  color: #fff;
+  background-color: #6a96ec;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+`;
 
 const Section = styled.section`
   padding-top: 20px;
@@ -228,8 +250,10 @@ const StyledFiChevronRight = styled(FiChevronRight)`
 const StyledFiChevronLeft = styled(FiChevronLeft)`
 margin-left: 5px;
   font-size: 24px;
-  cursor: pointer;
+  border-radius: 50%;
+  border: 1px solid #333;
   &:hover {
+    cursor: pointer;
     color: #333;
   }
 `;

@@ -31,8 +31,9 @@ const Login = () => {
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 400 && error.response.data.message === '아이디 또는 비밀번호가 일치하지 않습니다.') {
-            console.log("아이디 또는 비밀번호가 일치하지 않음");
-          } else {
+            alert("아이디 또는 비밀번호가 일치하지 않습니다.");
+          } else if (error.response.status === 401) {
+            alert("아이디와 비밀번호 모두 입력해주세요.")
             console.log('로그인 실패: ' + error.response.data.message);
           }
         } else {
