@@ -34,7 +34,6 @@ const LabRent: React.FC = () => {
 
   useEffect(() => {
     fetchAvailableLabs();
-    fetchRentalRequests();
   }, []);
 
   const fetchAvailableLabs = async () => {
@@ -43,15 +42,6 @@ const LabRent: React.FC = () => {
       setAvailableLabs(response.data);
     } catch (error) {
       console.error('실습실 조회 실패', error);
-    }
-  };
-
-  const fetchRentalRequests = async () => {
-    try {
-      const response = await axios.get<RentalRequest[]>('http://localhost:3000/lab/requests');
-      setRentalRequests(response.data);
-    } catch (error) {
-      console.error('대여 요청 조회 실패', error);
     }
   };
 
