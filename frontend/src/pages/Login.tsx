@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+const backendAddress = 'plab-backend.kro.kr'
+
 const Login = () => {
   const [formData, setFormData] = useState({
     userid: '',
@@ -18,7 +20,7 @@ const Login = () => {
   };
 
   const handleLogin = () => {
-    axios.post('http://localhost:3000/auth/login', {
+    axios.post(`http://${backendAddress}:3000/auth/login`, {
       userid: formData.userid,
       password: formData.password
     })

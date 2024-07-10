@@ -9,7 +9,7 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import trash from '../../assets/trash.svg';
 
-const backendAddress = '';
+const backendAddress = 'plab-backend.kro.kr';
 
 interface Lab {
   userId: any;

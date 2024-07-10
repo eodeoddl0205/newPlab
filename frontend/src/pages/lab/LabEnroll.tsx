@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Header from '../../components/Header';
 
-const backendAddress = '';
+const backendAddress = 'plab-backend.kro.kr';
 
 const LabEnroll = () => {
   const [formData, setFormData] = useState({

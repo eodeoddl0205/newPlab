@@ -5,7 +5,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 
-const backendAddress = '';
+const backendAddress = 'plab-backend.kro.kr';
 
 const TeacherScreen = () => {
     const navigate = useNavigate();
