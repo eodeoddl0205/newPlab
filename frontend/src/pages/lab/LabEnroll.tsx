@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Header from '../../components/Header';
 
+const backendAddress = '';
+
 const LabEnroll = () => {
   const [formData, setFormData] = useState({
     rentalDate: '',
@@ -11,6 +13,7 @@ const LabEnroll = () => {
     rentalPurpose: '',
     hopeLab: '',
     rentalUser: '',
+    rentalUsers: '',
   });
 
   const handleChange = (e: any) => {
@@ -23,8 +26,22 @@ const LabEnroll = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      alert('Access token not found. Please log in again.');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:3000/lab/rental', formData);
+      const response = await axios.post(
+        `http://${backendAddress}:3000/lab/rental`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
       console.log(response.data);
       alert('Form submitted successfully!');
     } catch (error) {
@@ -66,8 +83,8 @@ const LabEnroll = () => {
               <input
                 type='text'
                 className='rental-input'
-                name='rentalUser'
-                value={formData.rentalUser}
+                name='rentalUsers'
+                value={formData.rentalUsers}
                 onChange={handleChange}
                 required
               />

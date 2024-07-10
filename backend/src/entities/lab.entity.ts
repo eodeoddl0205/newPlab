@@ -2,8 +2,9 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { CommonBigPKEntity } from './common.entity';
 
-export enum approvalStatus {
-  WAITING = 'WAITING',
+export enum ApprovalStatus  {
+  APPROVALWAITING = 'APPROVALWAITING',
+  DELETIONWAITING = 'DELETIONWAITING',
   APPROVED = 'APPROVED',
 }
 
@@ -12,16 +13,13 @@ export class LabEntity extends CommonBigPKEntity {
   @Column('date', { nullable: false })
   rentalDate: Date;
 
-  @Column('varchar', { nullable: false, length: 5 })
+  @Column('varchar', { nullable: false, length: 30 })
   rentalStartTime: string;
-
-  @Column('varchar', { nullable: false, length: 5 })
-  rentalEndTime: string;
 
   @Column('varchar', { nullable: false, length: 100 })
   rentalPurpose: string;
 
-  @Column('varchar', { nullable: false, length: 20 })
+  @Column('varchar', { nullable: false, length: 30 })
   hopeLab: string;
 
   @Column('int', { unique: false, nullable: false })
@@ -32,9 +30,9 @@ export class LabEntity extends CommonBigPKEntity {
 
   @Column({
     type: 'enum',
-    enum: approvalStatus,
+    enum: ApprovalStatus ,
   })
-  approvalStatus: approvalStatus;
+  approvalStatus: ApprovalStatus;
 
   @OneToOne(() => UserEntity)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })

@@ -9,13 +9,14 @@ import { LoginDto } from 'src/dtos/LoginDto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async logIn(@Body() loginDto: LoginDto) {
-    const loginUser = await this.authService.logIn(loginDto);
-    return loginUser;
+  async logIn(@Req() req) {
+    const user = req?.user;
+    console.log('user : ', user);
+    return this.authService.logIn(user);
   }
 
   @Get('/authenticate')

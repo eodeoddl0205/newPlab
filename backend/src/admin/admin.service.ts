@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LabInformationEntity } from 'src/entities/lab-info.entity';
-import { LabEntity, approvalStatus } from 'src/entities/lab.entity';
+import { LabEntity, ApprovalStatus } from 'src/entities/lab.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,21 +11,31 @@ export class AdminService {
     private readonly labRepository: Repository<LabEntity>,
     @InjectRepository(LabInformationEntity)
     private readonly labInformationRepository: Repository<LabInformationEntity>,
-  ) {}
+  ) { }
+
   async cancelRentalLab(userId: string) {
     const lab = await this.labRepository.findOne({
       where: { userId: userId },
     });
 
+    if (!lab) {
+      throw new NotFoundException(`Rental lab with userId ${userId} not found`);
+    } else {
+      console.log(lab);
+    }
+
     const labInfo = await this.labInformationRepository.findOne({
       where: { labName: lab.hopeLab },
     });
+
     const deleteLab = await this.labRepository.delete({
       userId: userId,
     });
+
     if (labInfo) {
       await this.labInformationRepository.remove(labInfo);
     }
+
     return { affected: deleteLab?.affected, labInfo };
   }
 
@@ -34,24 +44,49 @@ export class AdminService {
       where: { userId: userId },
     });
 
+    if (!lab) {
+      throw new NotFoundException(`Rental lab with userId ${userId} not found`);
+    } else {
+      console.log(lab);
+    }
+
+    if (!lab.hopeLab) {
+      throw new InternalServerErrorException(`hopeLab is null for rental request with userId ${userId}`);
+    }
+
     const permitResult = await this.labRepository.update(
       { userId: userId },
-      { approvalStatus: approvalStatus.APPROVED },
+      { approvalStatus: ApprovalStatus.APPROVED },
     );
 
-    const labInfo = await this.labInformationRepository.create({
+    const labInfo = this.labInformationRepository.create({
       labName: lab.hopeLab,
-      Available: false,
+      Available: 1,
+      userId: lab.userId,
+      rentalPurpose: lab.rentalPurpose,
+      rentalUser: lab.rentalUser,
+      rentalStartTime: lab.rentalStartTime,
+      rentalDate: lab.rentalDate
     });
+
     const saveInfo = await this.labInformationRepository.save(labInfo);
+
     return { affected: permitResult?.affected, saveInfo };
   }
 
-  async getRequest(): Promise<LabEntity[]> {
+  async getApprovalRequest(): Promise<LabEntity[]> {
     return this.labRepository.find({
       where: {
-        approvalStatus: approvalStatus.WAITING,
+        approvalStatus: ApprovalStatus.APPROVALWAITING,
       },
     });
+  }
+
+  async getDeletionRequest(): Promise<LabEntity[]> {
+    return this.labRepository.find({
+      where: {
+        approvalStatus: ApprovalStatus.DELETIONWAITING
+      }
+    })
   }
 }

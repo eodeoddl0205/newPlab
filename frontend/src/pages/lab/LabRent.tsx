@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Modal from 'react-modal';
 import axios from 'axios';
@@ -9,27 +9,25 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import trash from '../../assets/trash.svg';
 
+const backendAddress = '';
+
 interface Lab {
+  userId: any;
+  rentalDate: ReactNode;
+  rentalStartTime: ReactNode;
+  rentalPurpose: ReactNode;
+  rentalUser: ReactNode;
+  deletionRental: any;
   id: number;
   labName: string;
   location: string;
   available: boolean;
 }
 
-interface RentalRequest {
-  id: number;
-  userId: number;
-  user: string;
-  lab: string;
-  use: string;
-  time: string;
-}
-
 const LabRent: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [availableLabs, setAvailableLabs] = useState<Lab[]>([]);
-  const [rentalRequests, setRentalRequests] = useState<RentalRequest[]>([]);
+  const [rentalRequests, setRentalRequests] = useState<Lab[]>([]);
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -38,8 +36,8 @@ const LabRent: React.FC = () => {
 
   const fetchAvailableLabs = async () => {
     try {
-      const response = await axios.get<Lab[]>('http://localhost:3000/lab/available');
-      setAvailableLabs(response.data);
+      const response = await axios.get<Lab[]>(`http://${backendAddress}:3000/lab/available`);
+      setRentalRequests(response.data);
     } catch (error) {
       console.error('실습실 조회 실패', error);
     }
@@ -47,19 +45,17 @@ const LabRent: React.FC = () => {
 
   const handleDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (selectedRequestId !== null) {
-        const request = rentalRequests.find(req => req.id === selectedRequestId);
-        if (request) {
-          await axios.patch(`http://localhost:3000/lab/cancel/${request.userId}`, {}, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          setRentalRequests(rentalRequests.filter(req => req.id !== selectedRequestId));
-          closeModal();
-        }
-      }
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.patch(`http://${backendAddress}:3000/lab/cancel/${selectedRequestId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!response.data.auth) {
+        alert('자신이 신청한 실습실이 아닙니다.')
+      };
+      closeModal();
+      window.location.reload();
     } catch (error) {
       console.error('실습실 취소 실패', error);
     }
@@ -100,33 +96,27 @@ const LabRent: React.FC = () => {
                 </p>
               </div>
             </div>
+            <Link to={'/lab/Teacher'} className='adminPage'>관리자 페이지 <span style={{ color: '#000' }}>{"->"}</span></Link>
           </div>
         </Head>
         <Body>
           <div>
-            <div className="available-labs">
-              <ul>
-                {availableLabs.map((lab) => (
-                  <li key={lab.id}>
-                    {lab.labName} - {lab.location} - {lab.available ? 'Available' : 'Not Available'}
-                  </li>
-                ))}
-              </ul>
-            </div>
             <div className="rental-list">
-              <p className="list-detail">대표자</p>
               <p className="list-detail">대여 실습실</p>
+              <p className="list-detail">대표자</p>
               <p className="list-detail">사용 목적</p>
               <p className="list-detail">대여시간</p>
+              <p className="list-detail">대여날짜</p>
               <p className="trash"></p>
             </div>
             {rentalRequests.map((request) => (
               <div key={request.id} className='user-list'>
-                <p className="user-detail">{request.user}</p>
-                <p className="user-detail">{request.lab}</p>
-                <p className="user-detail">{request.use}</p>
-                <p className="user-detail">{request.time}</p>
-                <img src={trash} alt="delete img" className='trash' onClick={() => openModal(request.id)} />
+                <p className="user-detail">{request.rentalUser}</p>
+                <p className="user-detail">{request.labName}</p>
+                <p className="user-detail">{request.rentalPurpose}</p>
+                <p className="user-detail">{request.rentalStartTime}</p>
+                <p className="user-detail">{request.rentalDate}</p>
+                {request.deletionRental ? <div>대기중</div> : <img src={trash} alt="delete img" className='trash' onClick={() => openModal(request.userId)} />}
               </div>
             ))}
           </div>
@@ -208,6 +198,13 @@ const Head = styled.div`
   justify-content: center;
   gap: 50px;
   height: 360px;
+
+  .adminPage {
+    width: 100%;
+    max-width: 650px;
+    text-align:right;
+    color: #ff0000;
+  }
 
   .rent-container, .notice-container {
     border: 1px solid #bebec7;

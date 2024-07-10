@@ -1,72 +1,202 @@
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import Header from "../../components/Header"
+import axios from 'axios';
+import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import { useNavigate } from 'react-router-dom';
+
+const backendAddress = '';
 
 const TeacherScreen = () => {
+    const navigate = useNavigate();
 
-    const user = {
-        user: '성홍제',
-        lab: '랩 7실',
-        use: '캡스톤 회의때문에 빌리고 싶습니다.',
-        time: '7:00'
+    const [approvalLab, setApprovalLab] = useState([]);
+    const [deletionLab, setDeletionLab] = useState([]);
+
+    useEffect(() => {
+        const fetchDataAndAdminCheck = async () => {
+            try {
+                await isAdmin();
+                await FetchApprovalLab();
+                await FetchDeletionLab();
+            } catch (error) {
+                console.error(error);
+
+            }
+        };
+        fetchDataAndAdminCheck();
+    }, []);
+
+    const isAdmin = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            alert('Access token not found. Please log in again.');
+            navigate('/login');
+            return;
+        }
+        try {
+            await axios.get(
+                `http://${backendAddress}:3000/admin/is-admin`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            );
+        }
+        catch (error : any) {
+            if (error.response && error.response.status === 403) {
+                alert('선생님만 사용 가능합니다.');
+                navigate('/');
+            } else {
+                console.error(error);
+            }
+        }
+    }
+
+    const FetchApprovalLab = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        try {
+            const response = await axios.post(
+                `http://${backendAddress}:3000/admin/approvalRental`, {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            );
+            setApprovalLab(response.data);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
-    return (
-        <Background>
-            <Header />
-            <Inner>
-                <LabReq>
-                    <LabChart>
-                        <div className="chart-container">
-                            <h1 className='head-title'>실습실 대여 요청</h1>
-                            <div className="chart">
-                                <div className="chart-title">
-                                    <p className="chart-detail">대표자</p>
-                                    <p className="chart-detail">대여 실습실</p>
-                                    <p className="chart-detail">사용 목적</p>
-                                    <p className="chart-detail">대여시간</p>
-                                    <p className="signBtn"></p>
-                                </div>
-                                <div className="chart-user">
-                                    <p className="user-list">{user.user}</p>
-                                    <p className="user-list">{user.lab}</p>
-                                    <p className="user-list">{user.use}</p>
-                                    <p className="user-list">{user.time}</p>
-                                    <button className="signBtn" id='signBtn'>대여 승인</button>
-                                </div>
-                            </div>
-                        </div>
-                    </LabChart>
-                </LabReq>
-                <LabDel>
-                    <LabChart>
-                        <div className="chart-container">
-                            <h1 className="head-title">실습실 대여 취소</h1>
-                            <div className="chart">
-                                <div className="chart-title">
-                                    <p className="chart-detail">대표자</p>
-                                    <p className="chart-detail">대여 실습실</p>
-                                    <p className="chart-detail">사용 목적</p>
-                                    <p className="chart-detail">대여시간</p>
-                                    <p className="delBtn"></p>
-                                </div>
-                                <div className="chart-user">
-                                    <p className="user-list">{user.user}</p>
-                                    <p className="user-list">{user.lab}</p>
-                                    <p className="user-list">{user.use}</p>
-                                    <p className="user-list">{user.time}</p>
-                                    <button className="delBtn" id='delBtn'>대여 취소</button>
-                                </div>
-                            </div>
-                        </div>
-                    </LabChart>
-                </LabDel>
-            </Inner>
-            <Footer />
-        </Background>
+    const FetchDeletionLab = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        try {
+            const response = await axios.post(
+                `http://${backendAddress}:3000/admin/deletionRental`, {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            );
+            setDeletionLab(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-    )
-}
+    const singLab = async (userid: any) => {
+        const accessToken = localStorage.getItem('accessToken');
+        try {
+            const response = await axios.patch(
+                `http://${backendAddress}:3000/admin/${userid}`, {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            );
+            if (response) {
+                alert('승인 성공.');
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error(error);
+            alert('failed.');
+        }
+    }
+
+    const delLab = async (userid: any) => {
+        const accessToken = localStorage.getItem('accessToken');
+        try {
+            const response = await axios.delete(
+                `http://${backendAddress}:3000/admin/${userid}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            );
+            if (response) {
+                alert('삭제 성공.');
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error(error);
+            alert('failed.');
+        }
+    }
+
+
+    return (
+        <>
+            <Header />
+            <Background>
+                <Inner>
+                    <LabReq>
+                        <LabChart>
+                            <div className='chart-container'>
+                                <h1 className="head-title">실습실 대여 요청</h1>
+                                <div className="chart">
+                                    <div className="chart-title">
+                                        <p className="chart-detail">대표자</p>
+                                        <p className="chart-detail">대여 실습실</p>
+                                        <p className="chart-detail">사용 목적</p>
+                                        <p className="chart-detail">대여시간</p>
+                                        <p className="signBtn"></p>
+                                    </div>
+                                    {approvalLab.map((rental : any) => (
+                                        <div key={rental.id}>
+                                            <div className="chart-user">
+                                                <p className="user-list">{rental.rentalUser}</p>
+                                                <p className="user-list">{rental.hopeLab}</p>
+                                                <p className="user-list">{rental.rentalPurpose}</p>
+                                                <p className="user-list">{rental.rentalStartTime}</p>
+                                                <button className="signBtn" id="signBtn" onClick={() => singLab(rental.userId)}>대여 승인</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </LabChart>
+                    </LabReq>
+                    <LabDel>
+                        <LabChart>
+                            <div className='chart-container'>
+                                <h1 className="head-title">실습실 대여 삭제</h1>
+                                <div className="chart">
+                                    <div className="chart-title">
+                                        <p className="chart-detail">대표자</p>
+                                        <p className="chart-detail">대여 실습실</p>
+                                        <p className="chart-detail">사용 목적</p>
+                                        <p className="chart-detail">대여시간</p>
+                                        <p className="signBtn"></p>
+                                    </div>
+                                    {deletionLab.map((rental : any) => (
+                                        <div key={rental.id}>
+                                            <div className="chart-user">
+                                                <p className="user-list">{rental.rentalUser}</p>
+                                                <p className="user-list">{rental.hopeLab}</p>
+                                                <p className="user-list">{rental.rentalPurpose}</p>
+                                                <p className="user-list">{rental.rentalStartTime}</p>
+                                                <button className="delBtn" id="delBtn" onClick={() => { delLab(rental.userId) }}>대여 삭제</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </LabChart>
+                    </LabDel>
+                </Inner>
+            </Background>
+            <Footer />
+        </>
+    );
+};
+
 
 const Background = styled.div`
   width: 100%;
